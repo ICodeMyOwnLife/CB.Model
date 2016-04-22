@@ -11,21 +11,20 @@ namespace CB.Model.Common
     public abstract class ObservableObject: INotifyPropertyChanged
     {
         #region Events
-        [field:NonSerialized]
+        [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
         #endregion
 
 
         #region Implementation
         private void InvokePropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         protected virtual void NotifyAllPropertyChanged()
-        {
-            InvokePropertyChanged("");
-        }
+            => InvokePropertyChanged("");
+
+        protected virtual void NotifyChanged([CallerMemberName] string propertyName = "")
+            => NotifyPropertyChanged(propertyName);
 
         protected virtual void NotifyPropertyChanged(string propertyName)
         {
@@ -33,24 +32,21 @@ namespace CB.Model.Common
             InvokePropertyChanged(propertyName);
         }
 
-        protected virtual void NotifyChanged([CallerMemberName] string propertyName = "")
-        {
-            NotifyPropertyChanged(propertyName);
-        }
-
-        protected virtual bool SetField<T>(ref T field, T value, string propertyName)
+        protected virtual bool SetField<T>(ref T field, T value, string propertyName, Func<T, T> transformField = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value)) return false;
 
-            field = value;
+            field = transformField == null ? value : transformField(value);
             NotifyPropertyChanged(propertyName);
             return true;
         }
 
         protected virtual bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "")
-        {
-            return SetField(ref field, value, propertyName);
-        }
+            => SetField(ref field, value, propertyName);
+
+        protected virtual bool SetProperty<T>(ref T field, T value, Func<T, T> transformField,
+            [CallerMemberName] string propertyName = "")
+            => SetField(ref field, value, propertyName, transformField);
         #endregion
     }
 }
