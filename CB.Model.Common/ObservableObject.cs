@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 
@@ -13,6 +14,14 @@ namespace CB.Model.Common
         #region Events
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
+        #endregion
+
+
+        #region Override
+        public override string ToString()
+        {
+            return string.Join(", ", GetType().GetProperties().Select(p => $"{p.Name}: {p.GetValue(this)}"));
+        }
         #endregion
 
 
