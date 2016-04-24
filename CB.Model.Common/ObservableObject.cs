@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 
@@ -17,6 +18,29 @@ namespace CB.Model.Common
         #endregion
 
 
+        #region Methods
+        public static void BindProperty(INotifyPropertyChanged sourceObject, string sourceProperty,
+            INotifyPropertyChanged targetObject, string targetProperty, BindMode bindMode)
+        {
+            switch (bindMode)
+            {
+                case BindMode.TwoWay:
+                    Bind(sourceObject, sourceProperty, targetObject, targetProperty);
+                    Bind(targetObject, targetProperty, sourceObject, sourceProperty);
+                    break;
+                case BindMode.OneWay:
+                    Bind(sourceObject, sourceProperty, targetObject, targetProperty);
+                    break;
+                case BindMode.OneWayToSource:
+                    Bind(targetObject, targetProperty, sourceObject, sourceProperty);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(bindMode), bindMode, null);
+            }
+        }
+        #endregion
+
+
         #region Override
         public override string ToString()
         {
@@ -26,11 +50,28 @@ namespace CB.Model.Common
 
 
         #region Implementation
+        private static void Bind(INotifyPropertyChanged sourceObject, string sourceProperty,
+            INotifyPropertyChanged targetObject, string targetProperty)
+        {
+            PropertyInfo sourceProp, targetProp;
+            if (sourceObject == null || string.IsNullOrEmpty(sourceProperty) || targetObject == null ||
+                string.IsNullOrEmpty(targetProperty) ||
+                (sourceProp = sourceObject.GetType().GetProperty(sourceProperty)) == null ||
+                (targetProp = targetObject.GetType().GetProperty(targetProperty)) == null) return;
+
+            sourceObject.PropertyChanged += (sender, args) =>
+            {
+                if (Equals(sourceProperty, args.PropertyName))
+                {
+                    targetProp.SetValue(targetObject, sourceProp.GetValue(sourceObject));
+                }
+            };
+        }
+
         private void InvokePropertyChanged(string propertyName)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        protected virtual void NotifyAllPropertyChanged()
-            => InvokePropertyChanged("");
+        protected virtual void NotifyAllPropertyChanged() => InvokePropertyChanged("");
 
         protected virtual void NotifyChanged([CallerMemberName] string propertyName = "")
             => NotifyPropertyChanged(propertyName);
@@ -54,8 +95,14 @@ namespace CB.Model.Common
             => SetField(ref field, value, propertyName);
 
         protected virtual bool SetProperty<T>(ref T field, T value, Func<T, T> transformField,
-            [CallerMemberName] string propertyName = "")
-            => SetField(ref field, value, propertyName, transformField);
+            [CallerMemberName] string propertyName = "") => SetField(ref field, value, propertyName, transformField);
         #endregion
+    }
+
+    public enum BindMode
+    {
+        TwoWay,
+        OneWay,
+        OneWayToSource
     }
 }
