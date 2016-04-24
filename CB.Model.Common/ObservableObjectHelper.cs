@@ -7,7 +7,7 @@ namespace CB.Model.Common
     {
         #region Methods
         public static void BindProperty(this INotifyPropertyChanged sourceObject, string sourceProperty,
-            INotifyPropertyChanged targetObject, string targetProperty, BindMode bindMode)
+            INotifyPropertyChanged targetObject, string targetProperty, BindMode bindMode = BindMode.TwoWay)
         {
             ObservableObject.BindProperty(sourceObject, sourceProperty, targetObject, targetProperty, bindMode);
         }

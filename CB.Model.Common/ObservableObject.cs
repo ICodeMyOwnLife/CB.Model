@@ -20,7 +20,7 @@ namespace CB.Model.Common
 
         #region Methods
         public static void BindProperty(INotifyPropertyChanged sourceObject, string sourceProperty,
-            INotifyPropertyChanged targetObject, string targetProperty, BindMode bindMode)
+            INotifyPropertyChanged targetObject, string targetProperty, BindMode bindMode = BindMode.TwoWay)
         {
             switch (bindMode)
             {
@@ -59,11 +59,13 @@ namespace CB.Model.Common
                 (sourceProp = sourceObject.GetType().GetProperty(sourceProperty)) == null ||
                 (targetProp = targetObject.GetType().GetProperty(targetProperty)) == null) return;
 
+            SetBoundProperty(sourceObject, sourceProp, targetObject, targetProp);
+
             sourceObject.PropertyChanged += (sender, args) =>
             {
                 if (Equals(sourceProperty, args.PropertyName))
                 {
-                    targetProp.SetValue(targetObject, sourceProp.GetValue(sourceObject));
+                    SetBoundProperty(sourceObject, sourceProp, targetObject, targetProp);
                 }
             };
         }
@@ -82,6 +84,12 @@ namespace CB.Model.Common
             InvokePropertyChanged(propertyName);
         }
 
+        private static void SetBoundProperty(INotifyPropertyChanged sourceObject, PropertyInfo sourceProp,
+            INotifyPropertyChanged targetObject, PropertyInfo targetProp)
+        {
+            targetProp.SetValue(targetObject, sourceProp.GetValue(sourceObject));
+        }
+
         protected virtual bool SetField<T>(ref T field, T value, string propertyName, Func<T, T> transformField = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value)) return false;
@@ -97,12 +105,5 @@ namespace CB.Model.Common
         protected virtual bool SetProperty<T>(ref T field, T value, Func<T, T> transformField,
             [CallerMemberName] string propertyName = "") => SetField(ref field, value, propertyName, transformField);
         #endregion
-    }
-
-    public enum BindMode
-    {
-        TwoWay,
-        OneWay,
-        OneWayToSource
     }
 }
