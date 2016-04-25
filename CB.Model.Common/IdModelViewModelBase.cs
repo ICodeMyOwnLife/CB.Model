@@ -95,9 +95,9 @@ namespace CB.Model.Common
 
 
         #region Implementation
-        protected virtual void OnSelectedItemChanged(TModel seletedItem)
+        protected virtual void OnSelectedItemChanged(TModel selectedItem)
         {
-            CanEdit = SelectedItem != null;
+            CanEdit = selectedItem != null;
         }
         #endregion
     }
