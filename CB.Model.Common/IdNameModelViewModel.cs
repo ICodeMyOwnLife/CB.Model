@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+
+
 namespace CB.Model.Common
 {
     public class IdNameModelViewModel:IdNameModelViewModelBase<IdNameModelBase>
@@ -7,7 +10,7 @@ namespace CB.Model.Common
             throw new System.NotImplementedException();
         }
 
-        protected override IdNameModelBase[] LoadItems()
+        protected override IEnumerable<IdNameModelBase> LoadItems()
         {
             throw new System.NotImplementedException();
         }

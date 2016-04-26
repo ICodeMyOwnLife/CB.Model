@@ -1,18 +1,48 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 
 
 namespace CB.Model.Common
 {
+    public class ModelConfiguration<TModel>
+    {
+        #region Fields
+        private readonly IList<Action<TModel>> _propertyInitializers = new List<Action<TModel>>();
+        #endregion
+
+
+        #region Methods
+        public ModelConfiguration<TModel> Collection<TCollection>(string collectionProperty,
+            Func<TCollection> collectionInitialization)
+        {
+            _propertyInitializers.Add(model =>
+            {
+                var prop = model.GetType().GetProperty(collectionProperty);
+                prop.SetValue(model, collectionInitialization());
+            });
+            return this;
+        }
+
+        public void LoadCollections(TModel model)
+        {
+            foreach (var initializer in _propertyInitializers) { initializer(model); }
+        }
+        #endregion
+    }
+
     public abstract class IdModelViewModelBase<TModel>: ViewModelBase where TModel: IdModelBase, new()
     {
         #region Fields
         private ICommand _addNewItemCommand;
         private bool _canEdit;
         private ICommand _deleteCommand;
-        private TModel[] _items;
+        private ObservableCollection<TModel> _items;
         private ICommand _loadCommand;
         private string _name = typeof(TModel).Name;
+        protected string _pluralName = $"{typeof(TModel).Name}s";
         private ICommand _saveCommand;
         private TModel _selectedItem;
         #endregion
@@ -21,7 +51,7 @@ namespace CB.Model.Common
         #region Abstract
         protected abstract bool CanSaveItem(TModel item);
         protected abstract void DeleteItem(int id);
-        protected abstract TModel[] LoadItems();
+        protected abstract IEnumerable<TModel> LoadItems();
         protected abstract TModel SaveItem(TModel item);
         #endregion
 
@@ -34,14 +64,17 @@ namespace CB.Model.Common
             get { return _canEdit; }
             private set { SetProperty(ref _canEdit, value); }
         }
-        
+
         public virtual ICommand DeleteCommand
             => GetCommand(ref _deleteCommand, _ => Delete(), _ => SelectedItem?.Id != null);
 
-        public virtual TModel[] Items
+        public virtual IEnumerable<TModel> Items
         {
             get { return _items; }
-            set { SetProperty(ref _items, value); }
+            protected set
+            {
+                SetProperty(ref _items, value as ObservableCollection<TModel> ?? new ObservableCollection<TModel>(value));
+            }
         }
 
         public ICommand LoadCommand => GetCommand(ref _loadCommand, _ => Load());
@@ -50,6 +83,12 @@ namespace CB.Model.Common
         {
             get { return _name; }
             set { SetProperty(ref _name, value); }
+        }
+
+        public virtual string PluralName
+        {
+            get { return _pluralName; }
+            set { SetProperty(ref _pluralName, value); }
         }
 
         public virtual ICommand SaveCommand
@@ -73,22 +112,26 @@ namespace CB.Model.Common
 
         public virtual void Delete()
         {
-            if (!SelectedItem.Id.HasValue) return;
+            if (SelectedItem?.Id == null) return;
 
             DeleteItem(SelectedItem.Id.Value);
-            Load();
+            _items.Remove(_items?.FirstOrDefault(i => i.Id != null && i.Id.Value == SelectedItem.Id.Value));
+            SelectedItem = Items?.FirstOrDefault();
         }
 
         public virtual void Load()
         {
             Items = LoadItems();
-            SelectedItem = Items?.Length > 0 ? Items[0] : null;
+            SelectedItem = Items?.FirstOrDefault();
         }
 
         public virtual void Save()
         {
             var savedItem = SaveItem(SelectedItem);
-            Items = LoadItems();
+            if (savedItem == null) return;
+
+            if (_items.All(i => i.Id != savedItem.Id)) _items.Add(savedItem);
+
             SelectedItem = savedItem.Id.HasValue ? Items.FirstOrDefault(i => i.Id == savedItem.Id) : null;
         }
         #endregion

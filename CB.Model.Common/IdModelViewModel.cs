@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 
 namespace CB.Model.Common
@@ -16,7 +17,7 @@ namespace CB.Model.Common
             throw new NotImplementedException();
         }
 
-        protected override IdModelBase[] LoadItems()
+        protected override IEnumerable<IdModelBase> LoadItems()
         {
             throw new NotImplementedException();
         }
