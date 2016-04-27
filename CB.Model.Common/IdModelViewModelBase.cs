@@ -20,13 +20,13 @@ namespace CB.Model.Common
     public class ViewModelConfiguration<TViewModel>: IViewModelConfiguration
     {
         #region Fields
-        private readonly TViewModel _model;
-        private readonly IList<Action<TViewModel>> _propertyInitializers = new List<Action<TViewModel>>();
+        private readonly object _model;
+        private readonly IList<Action<object>> _propertyInitializers = new List<Action<object>>();
         #endregion
 
 
         #region  Constructors & Destructor
-        public ViewModelConfiguration(TViewModel model)
+        public ViewModelConfiguration(object model)
         {
             _model = model;
         }
@@ -45,12 +45,23 @@ namespace CB.Model.Common
                 var itemsPropInfo = GetPropertyInfo(itemsExpression);
                 _propertyInitializers.Add(model => { itemsPropInfo.SetValue(model, initializeCollection()); });
             }
+
+            if (selectedItemExpression != null && getItemId != null)
+            {
+                var selectedPropInfo = GetPropertyInfo(selectedItemExpression);
+                _
+            }
             return this;
         }
 
         public void LoadItems()
         {
             foreach (var initializer in _propertyInitializers) { initializer(_model); }
+        }
+
+        public void SetSelectedItems()
+        {
+            
         }
         #endregion
 
