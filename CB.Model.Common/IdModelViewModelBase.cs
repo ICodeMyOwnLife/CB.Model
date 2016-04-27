@@ -1,94 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Windows.Input;
 
 
 namespace CB.Model.Common
 {
-    public interface IViewModelConfiguration
-    {
-        #region Abstract
-        void LoadItems();
-        #endregion
-    }
-
-    public class ViewModelConfiguration<TViewModel>: IViewModelConfiguration
-    {
-        #region Fields
-        private readonly object _model;
-        private readonly IList<Action<object>> _propertyInitializers = new List<Action<object>>();
-        #endregion
-
-
-        #region  Constructors & Destructor
-        public ViewModelConfiguration(object model)
-        {
-            _model = model;
-        }
-        #endregion
-
-
-        #region Methods
-        public ViewModelConfiguration<TViewModel> Items<TCollection, TItem, TId>(
-            Expression<Func<TViewModel, TCollection>> itemsExpression,
-            Func<TCollection> initializeCollection = null,
-            Expression<Func<TViewModel, TItem>> selectedItemExpression = null,
-            Func<TItem, TId> getItemId = null) where TCollection: IEnumerable<TItem>
-        {
-            if (itemsExpression != null && initializeCollection != null)
-            {
-                var itemsPropInfo = GetPropertyInfo(itemsExpression);
-                _propertyInitializers.Add(model => { itemsPropInfo.SetValue(model, initializeCollection()); });
-            }
-
-            if (selectedItemExpression != null && getItemId != null)
-            {
-                var selectedPropInfo = GetPropertyInfo(selectedItemExpression);
-                _
-            }
-            return this;
-        }
-
-        public void LoadItems()
-        {
-            foreach (var initializer in _propertyInitializers) { initializer(_model); }
-        }
-
-        public void SetSelectedItems()
-        {
-            
-        }
-        #endregion
-
-
-        #region Implementation
-        private static PropertyInfo GetPropertyInfo<TObject, TProperty>(
-            Expression<Func<TObject, TProperty>> propertyExpression)
-        {
-            if (propertyExpression == null) throw new ArgumentNullException(nameof(propertyExpression));
-
-            var memberExpr = propertyExpression.Body as MemberExpression;
-            if (memberExpr == null)
-                throw new ArgumentException($"{propertyExpression} refers to a method, not a property.");
-
-            var propInfo = memberExpr.Member as PropertyInfo;
-            if (propInfo == null)
-                throw new ArgumentException($"{propertyExpression} refers to a field, not a property.");
-
-            Type objType = typeof(TObject), reflectedType = propInfo.ReflectedType;
-            if (reflectedType == null || objType != reflectedType && !objType.IsSubclassOf(reflectedType))
-                throw new ArgumentException($"{propertyExpression} refers to a property that is not from type {objType}");
-
-            return propInfo;
-        }
-        #endregion
-    }
-
     public abstract class IdModelViewModelBase<TModel>: ViewModelBase where TModel: IdModelBase, new()
     {
         #region Fields
@@ -101,7 +19,7 @@ namespace CB.Model.Common
         protected string _pluralName = $"{typeof(TModel).Name}s";
         private ICommand _saveCommand;
         private TModel _selectedItem;
-        private readonly IViewModelConfiguration _viewModelConfiguration;
+        private readonly IViewModelConfiguration<TModel> _viewModelConfiguration;
         #endregion
 
 
@@ -205,7 +123,7 @@ namespace CB.Model.Common
 
 
         #region Implementation
-        protected virtual IViewModelConfiguration CreateViewModelConfiguration()
+        protected virtual IViewModelConfiguration<TModel> CreateViewModelConfiguration()
         {
             return null;
         }
@@ -213,6 +131,7 @@ namespace CB.Model.Common
         protected virtual void OnSelectedItemChanged(TModel selectedItem)
         {
             CanEdit = selectedItem != null;
+            _viewModelConfiguration?.SetSelectedItems(selectedItem);
         }
         #endregion
     }
