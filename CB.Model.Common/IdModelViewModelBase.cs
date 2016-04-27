@@ -1,34 +1,79 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows.Input;
 
 
 namespace CB.Model.Common
 {
-    public class ModelConfiguration<TModel>
+    public interface IViewModelConfiguration
+    {
+        #region Abstract
+        void LoadItems();
+        #endregion
+    }
+
+    public class ViewModelConfiguration<TViewModel>: IViewModelConfiguration
     {
         #region Fields
-        private readonly IList<Action<TModel>> _propertyInitializers = new List<Action<TModel>>();
+        private readonly TViewModel _model;
+        private readonly IList<Action<TViewModel>> _propertyInitializers = new List<Action<TViewModel>>();
+        #endregion
+
+
+        #region  Constructors & Destructor
+        public ViewModelConfiguration(TViewModel model)
+        {
+            _model = model;
+        }
         #endregion
 
 
         #region Methods
-        public ModelConfiguration<TModel> Collection<TCollection>(string collectionProperty,
-            Func<TCollection> collectionInitialization)
+        public ViewModelConfiguration<TViewModel> Items<TCollection, TItem, TId>(
+            Expression<Func<TViewModel, TCollection>> itemsExpression,
+            Func<TCollection> initializeCollection = null,
+            Expression<Func<TViewModel, TItem>> selectedItemExpression = null,
+            Func<TItem, TId> getItemId = null) where TCollection: IEnumerable<TItem>
         {
-            _propertyInitializers.Add(model =>
+            if (itemsExpression != null && initializeCollection != null)
             {
-                var prop = model.GetType().GetProperty(collectionProperty);
-                prop.SetValue(model, collectionInitialization());
-            });
+                var itemsPropInfo = GetPropertyInfo(itemsExpression);
+                _propertyInitializers.Add(model => { itemsPropInfo.SetValue(model, initializeCollection()); });
+            }
             return this;
         }
 
-        public void LoadCollections(TModel model)
+        public void LoadItems()
         {
-            foreach (var initializer in _propertyInitializers) { initializer(model); }
+            foreach (var initializer in _propertyInitializers) { initializer(_model); }
+        }
+        #endregion
+
+
+        #region Implementation
+        private static PropertyInfo GetPropertyInfo<TObject, TProperty>(
+            Expression<Func<TObject, TProperty>> propertyExpression)
+        {
+            if (propertyExpression == null) throw new ArgumentNullException(nameof(propertyExpression));
+
+            var memberExpr = propertyExpression.Body as MemberExpression;
+            if (memberExpr == null)
+                throw new ArgumentException($"{propertyExpression} refers to a method, not a property.");
+
+            var propInfo = memberExpr.Member as PropertyInfo;
+            if (propInfo == null)
+                throw new ArgumentException($"{propertyExpression} refers to a field, not a property.");
+
+            Type objType = typeof(TObject), reflectedType = propInfo.ReflectedType;
+            if (reflectedType == null || objType != reflectedType && !objType.IsSubclassOf(reflectedType))
+                throw new ArgumentException($"{propertyExpression} refers to a property that is not from type {objType}");
+
+            return propInfo;
         }
         #endregion
     }
@@ -45,6 +90,16 @@ namespace CB.Model.Common
         protected string _pluralName = $"{typeof(TModel).Name}s";
         private ICommand _saveCommand;
         private TModel _selectedItem;
+        private readonly IViewModelConfiguration _viewModelConfiguration;
+        #endregion
+
+
+        #region  Constructors & Destructor
+        [SuppressMessage("ReSharper", "VirtualMemberCallInContructor")]
+        protected IdModelViewModelBase()
+        {
+            _viewModelConfiguration = CreateViewModelConfiguration();
+        }
         #endregion
 
 
@@ -121,6 +176,7 @@ namespace CB.Model.Common
 
         public virtual void Load()
         {
+            _viewModelConfiguration?.LoadItems();
             Items = LoadItems();
             SelectedItem = Items?.FirstOrDefault();
         }
@@ -138,6 +194,11 @@ namespace CB.Model.Common
 
 
         #region Implementation
+        protected virtual IViewModelConfiguration CreateViewModelConfiguration()
+        {
+            return null;
+        }
+
         protected virtual void OnSelectedItemChanged(TModel selectedItem)
         {
             CanEdit = selectedItem != null;
