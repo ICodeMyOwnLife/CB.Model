@@ -9,42 +9,72 @@ using System.Windows.Input;
 
 namespace CB.Model.Common
 {
-    public abstract class ConfiguredViewModelBase<TModel>: ViewModelBase
+   public abstract class ConfiguredViewModelBase<TModel>: ViewModelBase
     {
         #region Fields
         private readonly IList<Action> _collectionInitializers = new List<Action>();
-        private readonly IList<Action<TModel>> _selectedItemSelectors = new List<Action<TModel>>();
+        private readonly IList<Action<TModel>> _selectedElementSetters = new List<Action<TModel>>();
+        private readonly IList<Action<TModel>> _beforeSaveItemModelSetters = new List<Action<TModel>>();
+        private readonly IList<Action<TModel>> _afterSaveItemModelSetters = new List<Action<TModel>>();
         #endregion
 
+        private static PropertyInfo GetPropertyInfo<TObject, TProperty>(
+            Expression<Func<TObject, TProperty>> propertyExpression)
+        {
+            if (propertyExpression == null) throw new ArgumentNullException(nameof(propertyExpression));
+
+            var memberExpr = propertyExpression.Body as MemberExpression;
+            if (memberExpr == null)
+                throw new ArgumentException($"{propertyExpression} refers to a method, not a property.");
+
+            var propInfo = memberExpr.Member as PropertyInfo;
+            if (propInfo == null)
+                throw new ArgumentException($"{propertyExpression} refers to a field, not a property.");
+
+            Type objType = typeof(TObject), reflectedType = propInfo.ReflectedType;
+            if (reflectedType == null || objType != reflectedType && !objType.IsSubclassOf(reflectedType))
+                throw new ArgumentException($"{propertyExpression} refers to a property that is not from type {objType}");
+
+            return propInfo;
+        }
 
         #region Methods
         public virtual ConfiguredViewModelBase<TModel> Collection<TCollection, TElement, TId>(
-            Expression<Func<TCollection>> collectionPropertyExpression,
-            Expression<Func<TElement>> selectedElementExpression, Func<TCollection> collectionInitializer,
-            Func<TModel, TElement> modelElementGetter, Func<TElement, TId> elementIdGetter)
+            Expression<Func<TCollection>> collectionExpression,
+            Func<TCollection> collectionInitializer,
+            Expression<Func<TElement>> selectedElementExpression, 
+            Expression<Func<TModel, TElement>> modelElementExpression,
+            Expression<Func<TModel, TId>> modelElementIdExpression,
+            Expression<Func<TElement, TId>> elementIdExpression)
             where TCollection: class, IEnumerable<TElement> where TElement: class
         {
-            if (collectionPropertyExpression == null || collectionInitializer == null) return this;
+            if (collectionExpression == null || collectionInitializer == null) return this;
 
-            var itemsPropInfo = GetPropertyInfo(collectionPropertyExpression);
+            var itemsPropInfo = GetPropertyInfo(collectionExpression);
             _collectionInitializers.Add(() => itemsPropInfo.SetValue(this, collectionInitializer()));
 
-            if (selectedElementExpression == null || modelElementGetter == null || elementIdGetter == null) return this;
+            if (selectedElementExpression == null || modelElementExpression == null || elementIdExpression == null) return this;
 
-            var selectedPropInfo = GetPropertyInfo(selectedElementExpression);
-            _selectedItemSelectors.Add(selectedItem =>
+            var selectedElementProp = GetPropertyInfo(selectedElementExpression);
+            _selectedElementSetters.Add(selectedItem =>
             {
-                var selectedModelItem = modelElementGetter(selectedItem);
+                var selectedModelItem = modelElementExpression(selectedItem);
                 var selectedValue = default(TElement);
 
-                if (selectedModelItem != null && elementIdGetter(selectedModelItem) != null)
+                if (selectedModelItem != null && elementIdExpression(selectedModelItem) != null)
                 {
                     var items = itemsPropInfo.GetValue(this) as TCollection;
                     selectedValue =
-                        items?.FirstOrDefault(i => elementIdGetter(i).Equals(elementIdGetter(selectedModelItem)));
+                        items?.FirstOrDefault(i => elementIdExpression(i).Equals(elementIdExpression(selectedModelItem)));
                 }
 
-                selectedPropInfo.SetValue(this, selectedValue);
+                selectedElementProp.SetValue(this, selectedValue);
+            });
+
+            _beforeSaveItemModelSetters.Add(item =>
+            {
+                selectedElementProp.SetValue(this, null);
+
             });
             return this;
         }
@@ -56,7 +86,7 @@ namespace CB.Model.Common
 
         public virtual void SetSelectedElements(TModel selectedItem)
         {
-            foreach (var selector in _selectedItemSelectors)
+            foreach (var selector in _selectedElementSetters)
             {
                 selector(selectedItem);
             }
@@ -106,7 +136,10 @@ namespace CB.Model.Common
         protected abstract bool CanSaveItem(TModel item);
         protected abstract void DeleteItem(int id);
         protected abstract IEnumerable<TModel> LoadItems();
-        protected abstract TModel SaveItem(TModel item);
+        protected virtual TModel SaveItem(TModel item)
+        {
+            
+        }
         #endregion
 
 
