@@ -83,9 +83,9 @@ namespace CB.Model.Common
             if (propInfo == null)
                 throw new ArgumentException($"{propertyExpression} refers to a field, not a property.");
 
-            Type objType = typeof(TObject), reflectedType = propInfo.ReflectedType;
+            /*Type objType = typeof(TObject), reflectedType = propInfo.ReflectedType;
             if (reflectedType == null || objType != reflectedType && !objType.IsSubclassOf(reflectedType))
-                throw new ArgumentException($"{propertyExpression} refers to a property that is not from type {objType}");
+                throw new ArgumentException($"{propertyExpression} refers to a property that is not from type {objType}");*/
 
             return propInfo;
         }

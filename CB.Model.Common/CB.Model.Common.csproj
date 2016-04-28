@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BindMode.cs" />
+    <Compile Include="ConfiguredViewModelBase.cs" />
     <Compile Include="IdModelBase.cs" />
     <Compile Include="IdModelViewModel.cs" />
     <Compile Include="IdModelViewModelBase.cs" />

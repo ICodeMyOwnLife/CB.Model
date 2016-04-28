@@ -2,121 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Windows.Input;
 
 
 namespace CB.Model.Common
 {
-   public abstract class ConfiguredViewModelBase<TModel>: ViewModelBase
-    {
-        #region Fields
-        private readonly IList<Action> _collectionInitializers = new List<Action>();
-        private readonly IList<Action<TModel>> _selectedElementSetters = new List<Action<TModel>>();
-        private readonly IList<Action<TModel>> _beforeSaveItemModelSetters = new List<Action<TModel>>();
-        private readonly IList<Action<TModel>> _afterSaveItemModelSetters = new List<Action<TModel>>();
-        #endregion
-
-        private static PropertyInfo GetPropertyInfo<TObject, TProperty>(
-            Expression<Func<TObject, TProperty>> propertyExpression)
-        {
-            if (propertyExpression == null) throw new ArgumentNullException(nameof(propertyExpression));
-
-            var memberExpr = propertyExpression.Body as MemberExpression;
-            if (memberExpr == null)
-                throw new ArgumentException($"{propertyExpression} refers to a method, not a property.");
-
-            var propInfo = memberExpr.Member as PropertyInfo;
-            if (propInfo == null)
-                throw new ArgumentException($"{propertyExpression} refers to a field, not a property.");
-
-            Type objType = typeof(TObject), reflectedType = propInfo.ReflectedType;
-            if (reflectedType == null || objType != reflectedType && !objType.IsSubclassOf(reflectedType))
-                throw new ArgumentException($"{propertyExpression} refers to a property that is not from type {objType}");
-
-            return propInfo;
-        }
-
-        #region Methods
-        public virtual ConfiguredViewModelBase<TModel> Collection<TCollection, TElement, TId>(
-            Expression<Func<TCollection>> collectionExpression,
-            Func<TCollection> collectionInitializer,
-            Expression<Func<TElement>> selectedElementExpression, 
-            Expression<Func<TModel, TElement>> modelElementExpression,
-            Expression<Func<TModel, TId>> modelElementIdExpression,
-            Expression<Func<TElement, TId>> elementIdExpression)
-            where TCollection: class, IEnumerable<TElement> where TElement: class
-        {
-            if (collectionExpression == null || collectionInitializer == null) return this;
-
-            var itemsPropInfo = GetPropertyInfo(collectionExpression);
-            _collectionInitializers.Add(() => itemsPropInfo.SetValue(this, collectionInitializer()));
-
-            if (selectedElementExpression == null || modelElementExpression == null || elementIdExpression == null) return this;
-
-            var selectedElementProp = GetPropertyInfo(selectedElementExpression);
-            _selectedElementSetters.Add(selectedItem =>
-            {
-                var selectedModelItem = modelElementExpression(selectedItem);
-                var selectedValue = default(TElement);
-
-                if (selectedModelItem != null && elementIdExpression(selectedModelItem) != null)
-                {
-                    var items = itemsPropInfo.GetValue(this) as TCollection;
-                    selectedValue =
-                        items?.FirstOrDefault(i => elementIdExpression(i).Equals(elementIdExpression(selectedModelItem)));
-                }
-
-                selectedElementProp.SetValue(this, selectedValue);
-            });
-
-            _beforeSaveItemModelSetters.Add(item =>
-            {
-                selectedElementProp.SetValue(this, null);
-
-            });
-            return this;
-        }
-
-        public virtual void LoadCollections()
-        {
-            foreach (var initializer in _collectionInitializers) { initializer(); }
-        }
-
-        public virtual void SetSelectedElements(TModel selectedItem)
-        {
-            foreach (var selector in _selectedElementSetters)
-            {
-                selector(selectedItem);
-            }
-        }
-        #endregion
-
-
-        #region Implementation
-        private PropertyInfo GetPropertyInfo<TProperty>(
-            Expression<Func<TProperty>> propertyExpression)
-        {
-            if (propertyExpression == null) throw new ArgumentNullException(nameof(propertyExpression));
-
-            var memberExpr = propertyExpression.Body as MemberExpression;
-            if (memberExpr == null)
-                throw new ArgumentException($"{propertyExpression} refers to a method, not a property.");
-
-            var propInfo = memberExpr.Member as PropertyInfo;
-            if (propInfo == null)
-                throw new ArgumentException($"{propertyExpression} refers to a field, not a property.");
-
-            Type objType = GetType(), reflectedType = propInfo.ReflectedType;
-            if (reflectedType == null || objType != reflectedType && !objType.IsSubclassOf(reflectedType))
-                throw new ArgumentException($"{propertyExpression} refers to a property that is not from type {objType}");
-
-            return propInfo;
-        }
-        #endregion
-    }
-
     public abstract class IdModelViewModelBase<TModel>: ConfiguredViewModelBase<TModel> where TModel: IdModelBase, new()
     {
         #region Fields
@@ -125,6 +15,7 @@ namespace CB.Model.Common
         private ICommand _deleteCommand;
         private ObservableCollection<TModel> _items;
         private ICommand _loadCommand;
+        private Action<int> _modelDeleterById;
         private string _name = typeof(TModel).Name;
         protected string _pluralName = $"{typeof(TModel).Name}s";
         private ICommand _saveCommand;
@@ -134,12 +25,6 @@ namespace CB.Model.Common
 
         #region Abstract
         protected abstract bool CanSaveItem(TModel item);
-        protected abstract void DeleteItem(int id);
-        protected abstract IEnumerable<TModel> LoadItems();
-        protected virtual TModel SaveItem(TModel item)
-        {
-            
-        }
         #endregion
 
 
@@ -218,6 +103,7 @@ namespace CB.Model.Common
             var savedItem = SaveItem(SelectedItem);
             if (savedItem == null) return;
 
+            SelectedItem.CopyFrom(savedItem, true);
             if (_items.All(i => i.Id != savedItem.Id)) _items.Add(savedItem);
 
             SelectedItem = savedItem.Id.HasValue ? Items.FirstOrDefault(i => i.Id == savedItem.Id) : null;
@@ -226,11 +112,39 @@ namespace CB.Model.Common
 
 
         #region Implementation
+        protected virtual void DeleteItem(TModel item)
+            => DeleteModel(item);
+
+        protected virtual void DeleteItem(int id)
+            => DeleteModel(id);
+
+        protected void DeleteModel(int id)
+            => _modelDeleterById?.Invoke(id);
+
+        protected virtual IEnumerable<TModel> LoadItems()
+        {
+            return LoadModels();
+        }
+
+        protected virtual ConfiguredViewModelBase<TModel> ModelDeleter(Action<int> modelDeleterById)
+        {
+            _modelDeleterById = modelDeleterById;
+            return this;
+        }
+
         protected virtual void OnSelectedItemChanged(TModel selectedItem)
         {
             CanEdit = selectedItem != null;
             SetSelectedElements(selectedItem);
         }
+
+        protected virtual TModel SaveItem(TModel item)
+        {
+            return SaveModel(item);
+        }
         #endregion
     }
 }
+
+
+// Add before Load (LoadCollections() after Add(), LoadItems() after SaveItem())
