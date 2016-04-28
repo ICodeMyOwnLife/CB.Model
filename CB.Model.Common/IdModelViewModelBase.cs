@@ -1,13 +1,93 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows.Input;
 
 
 namespace CB.Model.Common
 {
-    public abstract class IdModelViewModelBase<TModel>: ViewModelBase where TModel: IdModelBase, new()
+    public abstract class ConfiguredViewModelBase<TModel>: ViewModelBase
+    {
+        #region Fields
+        private readonly IList<Action> _collectionInitializers = new List<Action>();
+        private readonly IList<Action<TModel>> _selectedItemSelectors = new List<Action<TModel>>();
+        #endregion
+
+
+        #region Methods
+        public virtual ConfiguredViewModelBase<TModel> Collection<TCollection, TElement, TId>(
+            Expression<Func<TCollection>> collectionPropertyExpression,
+            Expression<Func<TElement>> selectedElementExpression, Func<TCollection> collectionInitializer,
+            Func<TModel, TElement> modelElementGetter, Func<TElement, TId> elementIdGetter)
+            where TCollection: class, IEnumerable<TElement> where TElement: class
+        {
+            if (collectionPropertyExpression == null || collectionInitializer == null) return this;
+
+            var itemsPropInfo = GetPropertyInfo(collectionPropertyExpression);
+            _collectionInitializers.Add(() => itemsPropInfo.SetValue(this, collectionInitializer()));
+
+            if (selectedElementExpression == null || modelElementGetter == null || elementIdGetter == null) return this;
+
+            var selectedPropInfo = GetPropertyInfo(selectedElementExpression);
+            _selectedItemSelectors.Add(selectedItem =>
+            {
+                var selectedModelItem = modelElementGetter(selectedItem);
+                var selectedValue = default(TElement);
+
+                if (selectedModelItem != null && elementIdGetter(selectedModelItem) != null)
+                {
+                    var items = itemsPropInfo.GetValue(this) as TCollection;
+                    selectedValue =
+                        items?.FirstOrDefault(i => elementIdGetter(i).Equals(elementIdGetter(selectedModelItem)));
+                }
+
+                selectedPropInfo.SetValue(this, selectedValue);
+            });
+            return this;
+        }
+
+        public virtual void LoadCollections()
+        {
+            foreach (var initializer in _collectionInitializers) { initializer(); }
+        }
+
+        public virtual void SetSelectedElements(TModel selectedItem)
+        {
+            foreach (var selector in _selectedItemSelectors)
+            {
+                selector(selectedItem);
+            }
+        }
+        #endregion
+
+
+        #region Implementation
+        private PropertyInfo GetPropertyInfo<TProperty>(
+            Expression<Func<TProperty>> propertyExpression)
+        {
+            if (propertyExpression == null) throw new ArgumentNullException(nameof(propertyExpression));
+
+            var memberExpr = propertyExpression.Body as MemberExpression;
+            if (memberExpr == null)
+                throw new ArgumentException($"{propertyExpression} refers to a method, not a property.");
+
+            var propInfo = memberExpr.Member as PropertyInfo;
+            if (propInfo == null)
+                throw new ArgumentException($"{propertyExpression} refers to a field, not a property.");
+
+            Type objType = GetType(), reflectedType = propInfo.ReflectedType;
+            if (reflectedType == null || objType != reflectedType && !objType.IsSubclassOf(reflectedType))
+                throw new ArgumentException($"{propertyExpression} refers to a property that is not from type {objType}");
+
+            return propInfo;
+        }
+        #endregion
+    }
+
+    public abstract class IdModelViewModelBase<TModel>: ConfiguredViewModelBase<TModel> where TModel: IdModelBase, new()
     {
         #region Fields
         private ICommand _addNewItemCommand;
@@ -19,16 +99,6 @@ namespace CB.Model.Common
         protected string _pluralName = $"{typeof(TModel).Name}s";
         private ICommand _saveCommand;
         private TModel _selectedItem;
-        private readonly IViewModelConfiguration<TModel> _viewModelConfiguration;
-        #endregion
-
-
-        #region  Constructors & Destructor
-        [SuppressMessage("ReSharper", "VirtualMemberCallInContructor")]
-        protected IdModelViewModelBase()
-        {
-            _viewModelConfiguration = CreateViewModelConfiguration();
-        }
         #endregion
 
 
@@ -105,7 +175,7 @@ namespace CB.Model.Common
 
         public virtual void Load()
         {
-            _viewModelConfiguration?.LoadItems();
+            LoadCollections();
             Items = LoadItems();
             SelectedItem = Items?.FirstOrDefault();
         }
@@ -123,15 +193,10 @@ namespace CB.Model.Common
 
 
         #region Implementation
-        protected virtual IViewModelConfiguration<TModel> CreateViewModelConfiguration()
-        {
-            return null;
-        }
-
         protected virtual void OnSelectedItemChanged(TModel selectedItem)
         {
             CanEdit = selectedItem != null;
-            _viewModelConfiguration?.SetSelectedItems(selectedItem);
+            SetSelectedElements(selectedItem);
         }
         #endregion
     }

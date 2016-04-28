@@ -71,8 +71,7 @@ namespace CB.Model.Common
 
 
         #region Implementation
-        private static PropertyInfo GetPropertyInfo<TObject, TProperty>(
-            Expression<Func<TObject, TProperty>> propertyExpression)
+        private static PropertyInfo GetPropertyInfo(LambdaExpression propertyExpression)
         {
             if (propertyExpression == null) throw new ArgumentNullException(nameof(propertyExpression));
 
