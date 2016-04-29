@@ -138,19 +138,19 @@ namespace CB.Model.Common
         protected virtual IEnumerable<TModel> LoadModels()
             => _modelsLoader?.Invoke();
 
-        protected virtual ConfiguredViewModelBase<TModel> ModelDeleter(Action<TModel> modelDeleter)
+        protected ConfiguredViewModelBase<TModel> ModelDeleter(Action<TModel> modelDeleter)
         {
             _modelDeleter = modelDeleter;
             return this;
         }
 
-        protected virtual ConfiguredViewModelBase<TModel> ModelSaver(Func<TModel, TModel> modelSaver)
+        protected ConfiguredViewModelBase<TModel> ModelSaver(Func<TModel, TModel> modelSaver)
         {
             _modelSaver = modelSaver;
             return this;
         }
 
-        protected virtual ConfiguredViewModelBase<TModel> ModelsLoader(Func<IEnumerable<TModel>> modelsLoader)
+        protected ConfiguredViewModelBase<TModel> ModelsLoader(Func<IEnumerable<TModel>> modelsLoader)
         {
             _modelsLoader = modelsLoader;
             return this;

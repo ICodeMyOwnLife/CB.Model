@@ -145,7 +145,7 @@ namespace CB.Model.Common
             return LoadModels();
         }
 
-        protected virtual ConfiguredViewModelBase<TModel> ModelDeleter(Action<int> modelDeleterById)
+        protected ConfiguredViewModelBase<TModel> ModelDeleter(Action<int> modelDeleterById)
         {
             _modelDeleterById = modelDeleterById;
             return this;
@@ -167,3 +167,4 @@ namespace CB.Model.Common
 
 
 // TODO: Test Add before Load (LoadCollections() after Add(), LoadItems() after SaveItem())
+// TODO: Separate collection initialization, selected element setter and before save and after save setter
