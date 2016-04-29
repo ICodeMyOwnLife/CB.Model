@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Data;
 using System.Windows.Input;
 
 
@@ -12,8 +13,11 @@ namespace CB.Model.Common
         #region Fields
         private ICommand _addNewItemCommand;
         private bool _canEdit;
+        private bool _collectionsLoaded;
         private ICommand _deleteCommand;
         private ObservableCollection<TModel> _items;
+
+        private ListCollectionView _itemsView;
         private ICommand _loadCommand;
         private Action<int> _modelDeleterById;
         private string _name = typeof(TModel).Name;
@@ -45,8 +49,18 @@ namespace CB.Model.Common
             get { return _items; }
             protected set
             {
-                SetProperty(ref _items, value as ObservableCollection<TModel> ?? new ObservableCollection<TModel>(value));
+                if (SetProperty(ref _items,
+                    value as ObservableCollection<TModel> ?? new ObservableCollection<TModel>(value)))
+                {
+                    ItemsView = _items == null ? null : new ListCollectionView(_items);
+                }
             }
+        }
+
+        public ListCollectionView ItemsView
+        {
+            get { return _itemsView; }
+            private set { SetProperty(ref _itemsView, value); }
         }
 
         public ICommand LoadCommand => GetCommand(ref _loadCommand, _ => Load());
@@ -80,7 +94,10 @@ namespace CB.Model.Common
 
         #region Methods
         public virtual void AddNewItem()
-            => SelectedItem = new TModel();
+        {
+            SelectedItem = new TModel();
+            if (!_collectionsLoaded) LoadCollections();
+        }
 
         public virtual void Delete()
         {
@@ -94,6 +111,7 @@ namespace CB.Model.Common
         public virtual void Load()
         {
             LoadCollections();
+            _collectionsLoaded = true;
             Items = LoadItems();
             SelectedItem = Items?.FirstOrDefault();
         }
@@ -101,6 +119,7 @@ namespace CB.Model.Common
         public virtual void Save()
         {
             var savedItem = SaveItem(SelectedItem);
+            if (Items == null) Items = LoadItems();
             if (savedItem == null) return;
 
             SelectedItem.CopyFrom(savedItem, true);
@@ -147,4 +166,4 @@ namespace CB.Model.Common
 }
 
 
-// Add before Load (LoadCollections() after Add(), LoadItems() after SaveItem())
+// TODO: Test Add before Load (LoadCollections() after Add(), LoadItems() after SaveItem())

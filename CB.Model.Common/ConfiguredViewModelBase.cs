@@ -160,16 +160,26 @@ namespace CB.Model.Common
         {
             if (_modelSaver == null) return default(TModel);
 
+            SetModelBeforeSaving(model);
+            var result = _modelSaver(model);
+            SetModelAfterSaving(result);
+            return result;
+        }
+
+        protected virtual void SetModelAfterSaving(TModel model)
+        {
+            foreach (var setter in _afterSaveItemModelSetters)
+            {
+                setter(model);
+            }
+        }
+
+        protected virtual void SetModelBeforeSaving(TModel model)
+        {
             foreach (var setter in _beforeSaveItemModelSetters)
             {
                 setter(model);
             }
-            var result = _modelSaver(model);
-            foreach (var setter in _afterSaveItemModelSetters)
-            {
-                setter(result);
-            }
-            return result;
         }
 
         protected virtual void SetSelectedElements(TModel selectedItem)
