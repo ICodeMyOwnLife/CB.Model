@@ -28,8 +28,8 @@ namespace CB.Model.Common
 
             _afterSaveItemModelSetters.Add(item =>
             {
-                var selectedElementProp = GetPropertyInfo(selectedElementExpression);
-                var modelElementProp = GetPropertyInfo(modelElementExpression);
+                var selectedElementProp = selectedElementExpression.GetPropertyInfo();
+                var modelElementProp = modelElementExpression.GetPropertyInfo();
                 var selectedElement = (TElement)selectedElementProp.GetValue(this);
                 modelElementProp.SetValue(item, selectedElement);
             });
@@ -43,12 +43,12 @@ namespace CB.Model.Common
                 elementIdGetter == null) return;
             _beforeSaveItemModelSetters.Add(item =>
             {
-                var selectedElementProp = GetPropertyInfo(selectedElementExpression);
-                var modelElementProp = GetPropertyInfo(modelElementExpression);
+                var selectedElementProp = selectedElementExpression.GetPropertyInfo();
+                var modelElementProp = modelElementExpression.GetPropertyInfo();
                 var selectedElement = (TElement)selectedElementProp.GetValue(this);
 
                 modelElementProp.SetValue(item, null);
-                var modelElementIdProp1 = GetPropertyInfo(modelElementIdExpression);
+                var modelElementIdProp1 = modelElementIdExpression.GetPropertyInfo();
                 modelElementIdProp1.SetValue(item, elementIdGetter(selectedElement));
             });
         }
@@ -60,7 +60,7 @@ namespace CB.Model.Common
 
             _collectionInitializers.Add(() =>
             {
-                var collectionProp = GetPropertyInfo(collectionExpression);
+                var collectionProp = collectionExpression.GetPropertyInfo();
                 collectionProp.SetValue(this, collectionInitializer());
             });
         }
@@ -75,9 +75,9 @@ namespace CB.Model.Common
 
             _selectedElementSetters.Add(selectedItem =>
             {
-                PropertyInfo selectedElementProp = GetPropertyInfo(selectedElementExpression),
-                             modelElementIdProp = GetPropertyInfo(modelElementIdExpression),
-                             collectionProp = GetPropertyInfo(collectionExpression);
+                PropertyInfo selectedElementProp = selectedElementExpression.GetPropertyInfo(),
+                             modelElementIdProp = modelElementIdExpression.GetPropertyInfo(),
+                             collectionProp = collectionExpression.GetPropertyInfo();
 
                 var selectedModelElementId = (TId)modelElementIdProp.GetValue(selectedItem);
 
@@ -113,22 +113,6 @@ namespace CB.Model.Common
 
         protected virtual void DeleteModel(TModel model)
             => _modelDeleter?.Invoke(model);
-
-        private static PropertyInfo GetPropertyInfo(
-            LambdaExpression propertyExpression)
-        {
-            if (propertyExpression == null) throw new ArgumentNullException(nameof(propertyExpression));
-
-            var memberExpr = propertyExpression.Body as MemberExpression;
-            if (memberExpr == null)
-                throw new ArgumentException($"{propertyExpression} refers to a method, not a property.");
-
-            var propInfo = memberExpr.Member as PropertyInfo;
-            if (propInfo == null)
-                throw new ArgumentException($"{propertyExpression} refers to a field, not a property.");
-
-            return propInfo;
-        }
 
         protected virtual void LoadCollections()
         {

@@ -10,3 +10,7 @@ namespace CB.Model.Common
         #endregion
     }
 }
+
+
+
+// TODO: Reimplement ToString
