@@ -44,7 +44,10 @@ namespace CB.Model.Common
         #region Override
         public override string ToString()
         {
-            return string.Join(", ", GetType().GetProperties().Select(p => $"{p.Name}: {p.GetValue(this)}"));
+            return $@"{GetType().Name}: {{{string.Join(", ",
+                GetType().GetProperties().Where(p => p.GetCustomAttribute<ToStringAttribute>() != null).OrderBy(
+                    p => p.GetCustomAttribute<ToStringAttribute>().OrderIndex).Select(
+                        p => $"{p.Name}: {p.GetValue(this)}"))}}}";
         }
         #endregion
 

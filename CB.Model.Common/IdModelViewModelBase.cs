@@ -14,9 +14,9 @@ namespace CB.Model.Common
         private ICommand _addNewItemCommand;
         private bool _canEdit;
         private bool _collectionsLoaded;
+        private ICommand _copyCommand;
         private ICommand _deleteCommand;
         private ObservableCollection<TModel> _items;
-
         private ListCollectionView _itemsView;
         private ICommand _loadCommand;
         private Action<int> _modelDeleterById;
@@ -40,6 +40,8 @@ namespace CB.Model.Common
             get { return _canEdit; }
             private set { SetProperty(ref _canEdit, value); }
         }
+
+        public ICommand CopyCommand => GetCommand(ref _copyCommand, _ => Copy(), _ => SelectedItem != null);
 
         public virtual ICommand DeleteCommand
             => GetCommand(ref _deleteCommand, _ => Delete(), _ => SelectedItem?.Id != null);
@@ -97,6 +99,20 @@ namespace CB.Model.Common
         {
             SelectedItem = new TModel();
             if (!_collectionsLoaded) LoadCollections();
+        }
+
+        public virtual void Copy()
+        {
+            if (SelectedItem == null)
+            {
+                AddNewItem();
+            }
+            else
+            {
+                var newItem = new TModel();
+                newItem.CopyFrom(SelectedItem, false);
+                SelectedItem = newItem;
+            }
         }
 
         public virtual void Delete()
@@ -168,3 +184,5 @@ namespace CB.Model.Common
 
 // TODO: Test Add before Load (LoadCollections() after Add(), LoadItems() after SaveItem())
 // TODO: Separate collection initialization, selected element setter and before save and after save setter
+// TODO: Add TextCommand
+// TODO: Add Validation, Required cues

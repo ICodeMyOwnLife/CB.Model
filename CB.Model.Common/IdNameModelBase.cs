@@ -8,6 +8,7 @@
 
 
         #region  Properties & Indexers
+        [ToString(OrderIndex = 1)]
         public virtual string Name
         {
             get { return _name; }
