@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -80,6 +81,9 @@ namespace CB.Model.Common
 
         protected virtual void NotifyChanged([CallerMemberName] string propertyName = "")
             => NotifyPropertyChanged(propertyName);
+
+        protected virtual void NotifyPropertyChanged<TProperty>(Expression<Func<TProperty>> propertyExpression)
+            => NotifyPropertyChanged(propertyExpression.GetPropertyName());
 
         protected virtual void NotifyPropertyChanged(string propertyName)
         {

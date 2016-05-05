@@ -3,7 +3,7 @@
 
 namespace CB.Model.Common
 {
-    public class IdModelBase: ObservableObject
+    public class IdModelBase: ObservableObject, IIdModel
     {
         #region Fields
         private int? _id;

@@ -7,6 +7,7 @@ namespace CB.Model.Common
 {
     public static class ExpressionHelper
     {
+        #region Methods
         public static PropertyInfo GetPropertyInfo(this LambdaExpression propertyExpression)
         {
             if (propertyExpression == null) throw new ArgumentNullException(nameof(propertyExpression));
@@ -19,7 +20,15 @@ namespace CB.Model.Common
             if (propInfo == null)
                 throw new ArgumentException($"{propertyExpression} refers to a field, not a property.");
 
+            if (propInfo.GetMethod.IsStatic)
+                throw new ArgumentException(
+                    $"{propertyExpression} refers to a static property, not an instance property.");
+
             return propInfo;
         }
+
+        public static string GetPropertyName(this LambdaExpression propertyExpression)
+            => GetPropertyInfo(propertyExpression).Name;
+        #endregion
     }
 }
