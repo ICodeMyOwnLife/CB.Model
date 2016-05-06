@@ -1,6 +1,6 @@
 namespace CB.Model.Common
 {
-    public abstract class IdEntityBase: ObservableObject, IIdEntity
+    public abstract class IdEntityBase: BindableObject, IIdEntity
     {
         #region Fields
         private int _id;
