@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -38,17 +37,6 @@ namespace CB.Model.Common
                 default:
                     throw new ArgumentOutOfRangeException(nameof(bindMode), bindMode, null);
             }
-        }
-        #endregion
-
-
-        #region Override
-        public override string ToString()
-        {
-            return $@"{GetType().Name}: {{{string.Join(", ",
-                GetType().GetProperties().Where(p => p.GetCustomAttribute<ToStringAttribute>() != null).OrderBy(
-                    p => p.GetCustomAttribute<ToStringAttribute>().OrderIndex).Select(
-                        p => $"{p.Name}: {p.GetValue(this)}"))}}}";
         }
         #endregion
 
