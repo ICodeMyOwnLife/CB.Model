@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Input;
@@ -36,21 +37,24 @@ namespace CB.Model.Common
             Predicate<object> canExecute = null)
             => command ?? (command = new RelayCommand(execute, canExecute));
 
+        protected virtual void NotifyPropertyChangedSync<TProperty>(Expression<Func<TProperty>> propertyExpression)
+            => NotifyPropertyChangedSync(propertyExpression.GetPropertyName());
+
+        protected virtual void NotifyPropertyChangedSync(string propertyName)
+        {
+            if (_synchronizationContext == null) NotifyPropertyChanged(propertyName);
+            else
+            {
+                _synchronizationContext.Send(_ => NotifyPropertyChanged(propertyName), null);
+            }
+        }
+
         protected virtual bool SetFieldSync<T>(ref T field, T value, string propertyName)
         {
             if (EqualityComparer<T>.Default.Equals(field, value)) return false;
 
             field = value;
-
-            if (_synchronizationContext != null)
-            {
-                _synchronizationContext.Send(_ => NotifyPropertyChanged(propertyName), null);
-            }
-            else
-            {
-                NotifyPropertyChanged(propertyName);
-            }
-
+            NotifyPropertyChangedSync(propertyName);
             return true;
         }
 
