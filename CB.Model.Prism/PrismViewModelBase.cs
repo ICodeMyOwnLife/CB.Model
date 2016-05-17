@@ -34,12 +34,16 @@ namespace CB.Model.Prism
 
         #region Implementation
         protected virtual void Confirm(string title, object content, Action<IConfirmation> callback)
-            => ConfirmationRequest.Raise(new Confirmation { Title = title, Content = content }, callback);
+        {
+            _synchronizationContext.Send(_ => ConfirmationRequest.Raise(
+                new Confirmation { Title = title, Content = content }, callback), null);
+        }
 
         protected virtual void Confirm(string content, Action<IConfirmation> callback)
             => Confirm(ConfirmTitle ?? CommonConfirmTitle, content, callback);
 
-        protected virtual ICommand GetCommand(ref ICommand command, Action executeAction, Func<bool> canExecuteFunc = null)
+        protected virtual ICommand GetCommand(ref ICommand command, Action executeAction,
+            Func<bool> canExecuteFunc = null)
             => command ?? (command = new DelegateCommand(executeAction, canExecuteFunc));
 
         protected virtual ICommand GetCommand(ref ICommand command, Action<object> executeAction,
@@ -51,7 +55,10 @@ namespace CB.Model.Prism
             => command ?? (command = new DelegateCommand<T>(executeAction, canExecuteFunc));
 
         protected virtual void Notify(string title, object content, Action<INotification> callback = null)
-            => NotificationRequest.Raise(new Notification { Title = title, Content = content }, callback);
+        {
+            _synchronizationContext.Send(
+                _ => NotificationRequest.Raise(new Notification { Title = title, Content = content }, callback), null);
+        }
 
         protected virtual void NotifyError(string content, Action<INotification> callback = null)
             => Notify(ErrorTitle ?? CommonErrorTitle, content, callback);

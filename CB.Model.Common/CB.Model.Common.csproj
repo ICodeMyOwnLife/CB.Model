@@ -65,6 +65,7 @@
     <Compile Include="IIdEntity.cs" />
     <Compile Include="IIdModel.cs" />
     <Compile Include="IIdNameEntity.cs" />
+    <Compile Include="ILog.cs" />
     <Compile Include="IViewModelConfiguration.cs" />
     <Compile Include="Key.cs" />
     <Compile Include="NotifiableViewModelBase.cs" />
