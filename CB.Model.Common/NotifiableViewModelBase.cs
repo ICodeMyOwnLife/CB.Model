@@ -19,13 +19,7 @@ namespace CB.Model.Common
             => NotifyPropertyChangedSync(propertyExpression.GetPropertyName());
 
         protected virtual void NotifyPropertyChangedSync(string propertyName)
-        {
-            if (_synchronizationContext == null) NotifyPropertyChanged(propertyName);
-            else
-            {
-                _synchronizationContext.Send(_ => NotifyPropertyChanged(propertyName), null);
-            }
-        }
+            => TryInvokeOnUiThread(() => NotifyPropertyChanged(propertyName));
 
         protected virtual bool SetFieldSync<T>(ref T field, T value, string propertyName)
         {
@@ -37,9 +31,10 @@ namespace CB.Model.Common
         }
 
         protected virtual bool SetPropertySync<T>(ref T field, T value, [CallerMemberName] string propertyName = "")
-        {
-            return SetFieldSync(ref field, value, propertyName);
-        }
+            => SetFieldSync(ref field, value, propertyName);
+
+        protected virtual void TryInvokeOnUiThread(Action action)
+            => _synchronizationContext?.Send(_ => action(), null);
         #endregion
     }
 }
