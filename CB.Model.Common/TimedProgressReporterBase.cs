@@ -33,18 +33,8 @@ namespace CB.Model.Common
         public override void Report(TReport reportValue)
         {
             var newProgress = GetProgressFromReportValue(reportValue);
-
-            if (Math.Abs(newProgress) < double.Epsilon)
-            {
-                _stopwatch.Restart();
-                RemainingTime = TimeSpan.MaxValue;
-            }
-            else if (Math.Abs(newProgress - 1) < double.Epsilon)
-            {
-                _stopwatch.Reset();
-                RemainingTime = TimeSpan.Zero;
-            }
-            else if (Math.Abs(newProgress - Progress) > MINIMUM_PROGRESS_INTERVAL)
+            if (Math.Abs(newProgress) < double.Epsilon || Math.Abs(newProgress - 1) < double.Epsilon ||
+                Math.Abs(newProgress - Progress) > MINIMUM_PROGRESS_INTERVAL)
             {
                 SetProgress(newProgress, reportValue);
             }
@@ -58,6 +48,17 @@ namespace CB.Model.Common
             Progress = newProgress;
             ElapsedTime = _stopwatch.Elapsed;
 
+            if (Math.Abs(newProgress) < double.Epsilon)
+            {
+                _stopwatch.Restart();
+                RemainingTime = TimeSpan.MaxValue;
+            }
+            else if (Math.Abs(newProgress - 1) < double.Epsilon)
+            {
+                _stopwatch.Reset();
+                RemainingTime = TimeSpan.Zero;
+            }
+            
             if (Progress > 0)
             {
                 RemainingTime = TimeSpan.FromMilliseconds(ElapsedTime.TotalMilliseconds * (1 - 1 / Progress));
