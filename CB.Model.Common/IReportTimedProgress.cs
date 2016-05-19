@@ -3,7 +3,7 @@ using System;
 
 namespace CB.Model.Common
 {
-    public interface IReportTimedProgress<T>: IReportProgress<T>
+    public interface IReportTimedProgress
     {
         #region Abstract
         TimeSpan ElapsedTime { get; }
