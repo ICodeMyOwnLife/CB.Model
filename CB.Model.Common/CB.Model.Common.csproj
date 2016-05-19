@@ -71,6 +71,7 @@
     <Compile Include="NotifiableViewModelBase.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="ObservableObjectHelper.cs" />
+    <Compile Include="ProgressReporter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyNotifiableObject.cs" />
     <Compile Include="RelayCommand.cs" />
