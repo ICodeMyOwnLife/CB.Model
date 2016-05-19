@@ -1,26 +1,23 @@
-using System;
-
-
 namespace CB.Model.Common
 {
-    public class ProgressReporter<T> : BindableObject, IProgress<T>
+    public class ProgressReporter<T>: BindableObject, IReportProgress<T>
     {
         #region Fields
-        private T _progress;
+        protected T _progress;
         #endregion
 
 
         #region  Properties & Indexers
-        public T Progress
+        public virtual T Progress
         {
             get { return _progress; }
-            private set { SetProperty(ref _progress, value); }
+            protected set { SetProperty(ref _progress, value); }
         }
         #endregion
 
 
-        #region Implementation
-        void IProgress<T>.Report(T value)
+        #region Methods
+        public virtual void Report(T value)
         {
             Progress = value;
         }
