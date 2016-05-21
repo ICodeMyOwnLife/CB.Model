@@ -1,6 +1,3 @@
-using System;
-
-
 namespace CB.Model.Common
 {
     public class FileProgressReporter: TimedProgressReporterBase<long>, IReportFileProgress
@@ -10,17 +7,8 @@ namespace CB.Model.Common
         private long _bytesTransferred;
         private string _fileName;
         private long _fileSize;
-        private string _speed;
-        private SpeedType _speedType;
+        private string _rate;
         private string _transferred;
-        #endregion
-
-
-        #region  Constructors & Destructor
-        public FileProgressReporter()
-        {
-            SpeedType = SpeedType.MBps;
-        }
         #endregion
 
 
@@ -28,7 +16,13 @@ namespace CB.Model.Common
         public double BytesPerSecond
         {
             get { return _bytesPerSecond; }
-            private set { SetProperty(ref _bytesPerSecond, value); }
+            private set
+            {
+                if (SetProperty(ref _bytesPerSecond, value))
+                {
+                    Rate = FileCapacityHelper.NormalizeCapacity(value) + "/s";
+                }
+            }
         }
 
         public long BytesTransferred
@@ -36,10 +30,11 @@ namespace CB.Model.Common
             get { return _bytesTransferred; }
             private set
             {
-                if (SetProperty(ref _bytesTransferred, value))
-                {
-                    Transferred = FileCapacityHelper.Normalize(value);
-                }
+                if (!SetProperty(ref _bytesTransferred, value)) return;
+
+                Transferred = FileCapacityHelper.NormalizeCapacity(value);
+                var elapsedSecond = ElapsedTime.TotalSeconds;
+                BytesPerSecond = elapsedSecond > 0 ? value / elapsedSecond : 0;
             }
         }
 
@@ -55,36 +50,10 @@ namespace CB.Model.Common
             set { SetProperty(ref _fileSize, value); }
         }
 
-        public virtual string Speed
+        public virtual string Rate
         {
-            get { return _speed; }
-            protected set { SetProperty(ref _speed, value); }
-        }
-
-        public SpeedType SpeedType
-        {
-            get { return _speedType; }
-            set
-            {
-                _speedType = value;
-                switch (value)
-                {
-                    case SpeedType.Bps:
-                        _unit = FileCapacityHelper.ONE_BYTE;
-                        break;
-                    case SpeedType.KBps:
-                        _unit = FileCapacityHelper.ONE_KB;
-                        break;
-                    case SpeedType.MBps:
-                        _unit = FileCapacityHelper.ONE_MB;
-                        break;
-                    case SpeedType.GBps:
-                        _unit = FileCapacityHelper.ONE_GB;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(value), value, null);
-                }
-            }
+            get { return _rate; }
+            protected set { SetProperty(ref _rate, value); }
         }
 
         public string Transferred
@@ -105,17 +74,7 @@ namespace CB.Model.Common
         {
             base.SetProgress(newProgress, reportValue);
             BytesTransferred = reportValue;
-
-            var elapsedSeconds = ElapsedTime.TotalSeconds;
-            if (elapsedSeconds > 0)
-            {
-                BytesPerSecond = reportValue / elapsedSeconds;
-            }
         }
-        #endregion
-
-
-        #region Implementation
         #endregion
     }
 }

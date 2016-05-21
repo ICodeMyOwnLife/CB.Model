@@ -1,3 +1,6 @@
+using System;
+
+
 namespace CB.Model.Common
 {
     public class FileCapacityHelper
@@ -18,36 +21,58 @@ namespace CB.Model.Common
 
 
         #region Methods
-        public static void Normalize(double bytes, out double value, out string unit)
+        public static double ConvertToGigaBytes(double bytes)
+        {
+            return bytes / ONE_GB;
+        }
+
+        public static double ConvertToKiloBytes(double bytes)
+        {
+            return bytes / ONE_KB;
+        }
+
+        public static double ConvertToMegaBytes(double bytes)
+        {
+            return bytes / ONE_MB;
+        }
+
+        public static void NormalizeCapacity(double bytes, out double normalizedValue, out string normalizedUnit)
         {
             if (bytes > ONE_GB)
             {
-                value = bytes / ONE_GB;
-                unit = GigaByte;
+                normalizedValue = ConvertToGigaBytes(bytes);
+                normalizedUnit = GigaByte;
             }
             else if (bytes > ONE_MB)
             {
-                value = bytes / ONE_MB;
-                unit = MegaByte;
+                normalizedValue = ConvertToMegaBytes(bytes);
+                normalizedUnit = MegaByte;
             }
             else if (bytes > ONE_KB)
             {
-                value = bytes / ONE_KB;
-                unit = KiloByte;
+                normalizedValue = ConvertToKiloBytes(bytes);
+                normalizedUnit = KiloByte;
             }
             else
             {
-                value = bytes;
-                unit = Byte;
+                normalizedValue = bytes;
+                normalizedUnit = Byte;
             }
         }
 
-        public static string Normalize(double bytes, string separtor = " ")
+        public static string NormalizeCapacity(double bytes, string separtor = " ")
         {
             double value;
             string unit;
-            Normalize(bytes, out value, out unit);
-            return $"{value}{separtor}{unit}";
+            NormalizeCapacity(bytes, out value, out unit);
+            return $"{value.ToString("N")}{separtor}{unit}";
+        }
+
+        public static void NormalizeRate(double bytes, TimeSpan time, TimeSpan timeUnit, out double normalizedValue,
+            out string normalizedUnit)
+        {
+            var rate = bytes * timeUnit.TotalMilliseconds / time.TotalMilliseconds;
+            NormalizeCapacity(rate, out normalizedValue, out normalizedUnit);
         }
         #endregion
     }
