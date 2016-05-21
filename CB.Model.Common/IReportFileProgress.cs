@@ -5,10 +5,7 @@ namespace CB.Model.Common
         #region Abstract
         long FileSize { get; set; }
 
-        /// <summary>
-        ///     MB/s
-        /// </summary>
-        double Speed { get; }
+        double BytesPerSecond { get; }
         #endregion
     }
 }

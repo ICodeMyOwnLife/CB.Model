@@ -52,6 +52,7 @@
     <Compile Include="BindMode.cs" />
     <Compile Include="ConfiguredViewModelBase.cs" />
     <Compile Include="ExpressionHelper.cs" />
+    <Compile Include="FileCapacityHelper.cs" />
     <Compile Include="FileProgressReporter.cs" />
     <Compile Include="IdEntityBase.cs" />
     <Compile Include="IdEntityViewModelBase.cs" />
