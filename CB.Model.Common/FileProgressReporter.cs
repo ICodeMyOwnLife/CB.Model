@@ -5,6 +5,7 @@ namespace CB.Model.Common
         #region Fields
         private double _bytesPerSecond;
         private long _bytesTransferred;
+        private string _capacity;
         private string _fileName;
         private long _fileSize;
         private string _rate;
@@ -16,7 +17,7 @@ namespace CB.Model.Common
         public double BytesPerSecond
         {
             get { return _bytesPerSecond; }
-            private set
+            protected set
             {
                 if (SetProperty(ref _bytesPerSecond, value))
                 {
@@ -28,7 +29,7 @@ namespace CB.Model.Common
         public long BytesTransferred
         {
             get { return _bytesTransferred; }
-            private set
+            set
             {
                 if (!SetProperty(ref _bytesTransferred, value)) return;
 
@@ -36,6 +37,12 @@ namespace CB.Model.Common
                 var elapsedSecond = ElapsedTime.TotalSeconds;
                 BytesPerSecond = elapsedSecond > 0 ? value / elapsedSecond : 0;
             }
+        }
+
+        public string Capacity
+        {
+            get { return _capacity; }
+            protected set { SetProperty(ref _capacity, value); }
         }
 
         public string FileName
@@ -47,7 +54,13 @@ namespace CB.Model.Common
         public long FileSize
         {
             get { return _fileSize; }
-            set { SetProperty(ref _fileSize, value); }
+            set
+            {
+                if (SetProperty(ref _fileSize, value))
+                {
+                    Capacity = FileCapacityHelper.NormalizeCapacity(value);
+                }
+            }
         }
 
         public virtual string Rate
@@ -59,13 +72,13 @@ namespace CB.Model.Common
         public string Transferred
         {
             get { return _transferred; }
-            private set { SetProperty(ref _transferred, value); }
+            protected set { SetProperty(ref _transferred, value); }
         }
         #endregion
 
 
         #region Override
-        protected override double GetProgressFromReportValue(long value)
+        protected override double? GetProgressFromReportValue(long value)
         {
             return (double)value / FileSize;
         }

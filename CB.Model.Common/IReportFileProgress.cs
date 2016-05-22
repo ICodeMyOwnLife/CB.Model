@@ -1,11 +1,17 @@
+using System;
+
+
 namespace CB.Model.Common
 {
-    public interface IReportFileProgress
+    public interface IReportFileProgress: IReportProgress<double?>
     {
         #region Abstract
-        long FileSize { get; set; }
-
         double BytesPerSecond { get; }
+        string Capacity { get; }
+        string FileName { get; set; }
+        long FileSize { get; set; }
+        string Rate { get; }
+        string Transferred { get; }
         #endregion
     }
 }

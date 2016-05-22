@@ -70,6 +70,14 @@ namespace CB.Model.Common
         protected virtual void NotifyChanged([CallerMemberName] string propertyName = "")
             => NotifyPropertyChanged(propertyName);
 
+        protected virtual void NotifyPropertiesChanged(params string[] propertyNames)
+        {
+            foreach (var propertyName in propertyNames)
+            {
+                NotifyPropertyChanged(propertyName);
+            }
+        }
+
         protected virtual void NotifyPropertyChanged<TProperty>(Expression<Func<TProperty>> propertyExpression)
             => NotifyPropertyChanged(propertyExpression.GetPropertyName());
 

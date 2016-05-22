@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace CB.Model.Common
 {
-    public abstract class TimedProgressReporterBase<TReport>: ProgressReporter<double, TReport>, IReportTimedProgress
+    public abstract class TimedProgressReporterBase<TReport>: ProgressReporter<double?, TReport>, IReportTimedProgress
     {
         #region Fields
         private const double MINIMUM_PROGRESS_INTERVAL = 0.002786;
@@ -33,10 +33,12 @@ namespace CB.Model.Common
         public override void Report(TReport reportValue)
         {
             var newProgress = GetProgressFromReportValue(reportValue);
-            if (Math.Abs(newProgress) < double.Epsilon || Math.Abs(newProgress - 1) < double.Epsilon ||
-                Math.Abs(newProgress - Progress) > MINIMUM_PROGRESS_INTERVAL)
+            if (newProgress.HasValue &&
+                (!Progress.HasValue || Math.Abs(newProgress.Value) < double.Epsilon ||
+                 Math.Abs(newProgress.Value - 1) < double.Epsilon ||
+                 Math.Abs(newProgress.Value - Progress.Value) > MINIMUM_PROGRESS_INTERVAL))
             {
-                SetProgress(newProgress, reportValue);
+                SetProgress(newProgress.Value, reportValue);
             }
         }
         #endregion
@@ -58,10 +60,10 @@ namespace CB.Model.Common
                 _stopwatch.Reset();
                 RemainingTime = TimeSpan.Zero;
             }
-            
+
             if (Progress > 0)
             {
-                RemainingTime = TimeSpan.FromMilliseconds(ElapsedTime.TotalMilliseconds * (1 - 1 / Progress));
+                RemainingTime = TimeSpan.FromMilliseconds(ElapsedTime.TotalMilliseconds * (1 - 1 / Progress.Value));
             }
         }
         #endregion
