@@ -29,6 +29,27 @@ namespace CB.Model.Common
         #endregion
 
 
+        #region Methods
+        public virtual void Pause()
+            => _stopwatch.Stop();
+
+        public virtual void Reset()
+            => _stopwatch.Reset();
+
+        public virtual void Restart()
+            => _stopwatch.Restart();
+
+        public virtual void Resume()
+            => _stopwatch.Start();
+
+        public virtual void Start()
+            => _stopwatch.Start();
+
+        public virtual void Stop()
+            => _stopwatch.Stop();
+        #endregion
+
+
         #region Override
         public override void Report(TReport reportValue)
         {
@@ -52,18 +73,18 @@ namespace CB.Model.Common
 
             if (Math.Abs(newProgress) < double.Epsilon)
             {
-                _stopwatch.Restart();
+                Restart();
                 RemainingTime = TimeSpan.MaxValue;
             }
             else if (Math.Abs(newProgress - 1) < double.Epsilon)
             {
-                _stopwatch.Reset();
+                Reset();
                 RemainingTime = TimeSpan.Zero;
             }
 
             if (Progress > 0)
             {
-                RemainingTime = TimeSpan.FromMilliseconds(ElapsedTime.TotalMilliseconds * (1 - 1 / Progress.Value));
+                RemainingTime = TimeSpan.FromMilliseconds(ElapsedTime.TotalMilliseconds * (1 / Progress.Value - 1));
             }
         }
         #endregion
