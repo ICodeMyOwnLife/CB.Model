@@ -1,6 +1,3 @@
-using System;
-
-
 namespace CB.Model.Common
 {
     public interface IReportFileProgress: IReportProgress<double?>
