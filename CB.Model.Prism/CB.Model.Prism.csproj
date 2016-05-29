@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfirmationRequestProvider.cs" />
+    <Compile Include="ConfirmationViewModelBase.cs" />
     <Compile Include="IFileTransferReporting.cs" />
     <Compile Include="NotificationRequestProvider.cs" />
     <Compile Include="PrismViewModelBase.cs" />
