@@ -20,7 +20,7 @@ namespace CB.Model.Prism
         protected ErrorsContainer<ValidationResult> ErrorsContainer
             => _errorsContainer ?? (_errorsContainer = new ErrorsContainer<ValidationResult>(OnErrorsChanged));
 
-        public virtual bool HasErrors => _errorsContainer.HasErrors;
+        public virtual bool HasErrors => ErrorsContainer.HasErrors;
         #endregion
 
 
@@ -31,7 +31,7 @@ namespace CB.Model.Prism
 
         #region Methods
         public virtual IEnumerable GetErrors(string propertyName)
-            => _errorsContainer.GetErrors(propertyName);
+            => ErrorsContainer.GetErrors(propertyName);
         #endregion
 
 
