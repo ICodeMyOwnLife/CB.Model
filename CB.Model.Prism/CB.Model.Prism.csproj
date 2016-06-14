@@ -55,6 +55,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq" />
@@ -67,8 +68,10 @@
   <ItemGroup>
     <Compile Include="ConfirmationRequestProvider.cs" />
     <Compile Include="ConfirmationViewModelBase.cs" />
+    <Compile Include="DomainObject.cs" />
     <Compile Include="IFileTransferReporting.cs" />
     <Compile Include="NotificationRequestProvider.cs" />
+    <Compile Include="PrismModelBase.cs" />
     <Compile Include="PrismViewModelBase.cs" />
     <Compile Include="ProgressState.cs" />
     <Compile Include="ProgressTaskViewModelBase.cs" />
