@@ -1,22 +1,25 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Windows.Data;
 
 
 namespace CB.Model.Common
 {
-    public class CollectionModelBase<TModel>: BindableObject
+    public class ModelCollectionBase<TModel, TCollection>: BindableObject where TCollection: IList, IEnumerable<TModel>
     {
         #region Fields
-        private IList _collection;
+        private TCollection _collection;
+
+        private ListCollectionView _collectionView;
         private TModel _selectedItem;
         #endregion
 
 
         #region  Constructors & Destructor
-        public CollectionModelBase() { }
+        public ModelCollectionBase() { }
 
-        public CollectionModelBase(IList collection)
+        public ModelCollectionBase(TCollection collection)
         {
             // ReSharper disable once VirtualMemberCallInContructor
             Collection = collection;
@@ -25,7 +28,7 @@ namespace CB.Model.Common
 
 
         #region  Properties & Indexers
-        public virtual IList Collection
+        public virtual TCollection Collection
         {
             get { return _collection; }
             set
@@ -37,7 +40,11 @@ namespace CB.Model.Common
             }
         }
 
-        public virtual ListCollectionView CollectionView { get; protected set; }
+        public ListCollectionView CollectionView
+        {
+            get { return _collectionView; }
+            protected set { SetProperty(ref _collectionView, value); }
+        }
 
         public virtual TModel SelectedItem
         {

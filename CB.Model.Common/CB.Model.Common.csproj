@@ -50,7 +50,7 @@
   <ItemGroup>
     <Compile Include="BindableObject.cs" />
     <Compile Include="BindMode.cs" />
-    <Compile Include="CollectionModelBase.cs" />
+    <Compile Include="ModelCollectionBase.cs" />
     <Compile Include="ConfiguredViewModelBase.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="ExpressionHelper.cs" />
