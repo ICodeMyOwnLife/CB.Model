@@ -62,7 +62,7 @@ namespace CB.Model.Common
             };
         }
 
-        private void InvokePropertyChanged(string propertyName)
+        protected virtual void InvokePropertyChanged(string propertyName)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         protected virtual void NotifyAllPropertyChanged() => InvokePropertyChanged("");

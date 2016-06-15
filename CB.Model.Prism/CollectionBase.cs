@@ -1,29 +1,17 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Windows.Data;
 
 
-namespace CB.Model.Common
+namespace CB.Model.Prism
 {
-    public class ModelCollectionBase<TModel, TCollection>: BindableObject where TCollection: IList, IEnumerable<TModel>
+    public class CollectionBase<TItem, TCollection>: PrismViewModelBase where TCollection: IList, IEnumerable<TItem>
     {
         #region Fields
         private TCollection _collection;
-
         private ListCollectionView _collectionView;
-        private TModel _selectedItem;
-        #endregion
-
-
-        #region  Constructors & Destructor
-        public ModelCollectionBase() { }
-
-        public ModelCollectionBase(TCollection collection)
-        {
-            // ReSharper disable once VirtualMemberCallInContructor
-            Collection = collection;
-        }
+        private TItem _selectedItem;
         #endregion
 
 
@@ -40,13 +28,13 @@ namespace CB.Model.Common
             }
         }
 
-        public ListCollectionView CollectionView
+        public virtual ListCollectionView CollectionView
         {
             get { return _collectionView; }
             protected set { SetProperty(ref _collectionView, value); }
         }
 
-        public virtual TModel SelectedItem
+        public virtual TItem SelectedItem
         {
             get { return _selectedItem; }
             protected set { SetProperty(ref _selectedItem, value); }
@@ -54,9 +42,27 @@ namespace CB.Model.Common
         #endregion
 
 
+        #region Methods
+        public virtual void Add(TItem item)
+        {
+            Collection.Add(item);
+            Select(item);
+        }
+
+        public virtual void Remove(TItem item)
+            => Collection.Remove(item);
+
+        public virtual void RemoveItem()
+            => Remove(SelectedItem);
+
+        public virtual void Select(TItem item)
+            => CollectionView.MoveCurrentTo(item);
+        #endregion
+
+
         #region Event Handlers
         protected virtual void View_CurrentChanged(object sender, EventArgs e)
-            => SelectedItem = (TModel)CollectionView.CurrentItem;
+            => SelectedItem = CollectionView.CurrentItem is TItem ? (TItem)CollectionView.CurrentItem : default(TItem);
         #endregion
     }
 }
