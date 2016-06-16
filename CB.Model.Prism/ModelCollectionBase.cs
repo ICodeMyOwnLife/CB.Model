@@ -10,19 +10,15 @@ namespace CB.Model.Prism
         where TCollection: IList, IEnumerable<TModel> where TModel: class, new()
     {
         #region  Constructors & Destructor
-        public ModelCollectionBase()
+        public ModelCollectionBase(): this(default(TCollection)) { }
+
+        public ModelCollectionBase(TCollection collection): base(collection)
         {
             AddCommand = new DelegateCommand<TModel>(Add);
             AddNewCommand = new DelegateCommand(AddNew);
             RemoveCommand = new DelegateCommand<TModel>(Remove, m => m != null);
             RemoveItemCommand = new DelegateCommand(RemoveItem, () => SelectedItem != null);
             SelectCommand = new DelegateCommand<TModel>(Select);
-        }
-
-        public ModelCollectionBase(TCollection collection): this()
-        {
-            // ReSharper disable once VirtualMemberCallInContructor
-            Collection = collection;
         }
         #endregion
 

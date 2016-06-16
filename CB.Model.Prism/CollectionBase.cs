@@ -15,6 +15,16 @@ namespace CB.Model.Prism
         #endregion
 
 
+        #region  Constructors & Destructor
+        public CollectionBase() { }
+
+        public CollectionBase(TCollection collection)
+        {
+            Collection = collection;
+        }
+        #endregion
+
+
         #region  Properties & Indexers
         public virtual TCollection Collection
         {
