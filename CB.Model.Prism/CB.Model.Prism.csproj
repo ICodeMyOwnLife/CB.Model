@@ -74,6 +74,8 @@
     <Compile Include="DomainObject.cs" />
     <Compile Include="IFileTransferReporting.cs" />
     <Compile Include="ModelCollectionBase.cs" />
+    <Compile Include="NamedCommand.cs" />
+    <Compile Include="INameCommand.cs" />
     <Compile Include="NotificationRequestProvider.cs" />
     <Compile Include="PrismModelBase.cs" />
     <Compile Include="PrismViewModelBase.cs" />
