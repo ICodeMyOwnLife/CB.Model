@@ -72,7 +72,7 @@ namespace CB.Model.Prism
             => ErrorsContainer.SetErrors(propertyName, errors?.Select(e => new ValidationResult(e)));
 
         protected virtual void SetPropertyErrors(string propertyName, params string[] errors)
-            => SetPropertyErrors(propertyName, errors.Any() ? (IEnumerable<string>)errors : null);
+            => SetPropertyErrors(propertyName, errors?.Any() == true ? (IEnumerable<string>)errors : null);
 
         protected virtual void ValidateProperty(object value, string propertyName)
         {

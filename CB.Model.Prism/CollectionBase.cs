@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq.Expressions;
 using System.Windows.Data;
+using CB.Model.Common;
 
 
 namespace CB.Model.Prism
@@ -20,6 +23,7 @@ namespace CB.Model.Prism
 
         public CollectionBase(TCollection collection)
         {
+            // ReSharper disable once VirtualMemberCallInContructor
             Collection = collection;
         }
         #endregion
@@ -59,6 +63,9 @@ namespace CB.Model.Prism
             Select(item);
         }
 
+        public virtual void Clear()
+            => Collection.Clear();
+
         public virtual void Remove(TItem item)
             => Collection.Remove(item);
 
@@ -67,6 +74,16 @@ namespace CB.Model.Prism
 
         public virtual void Select(TItem item)
             => CollectionView.MoveCurrentTo(item);
+
+        public virtual void Sort<TProperty>(Expression<Func<TItem, TProperty>> propertyExpression,
+            ListSortDirection direction)
+            => Sort(propertyExpression.GetPropertyName(), direction);
+
+        public virtual void Sort(string propertyName, ListSortDirection direction)
+        {
+            CollectionView.SortDescriptions.Clear();
+            CollectionView.SortDescriptions.Add(new SortDescription(propertyName, direction));
+        }
         #endregion
 
 

@@ -73,7 +73,8 @@
     <Compile Include="ConfirmationViewModelBase.cs" />
     <Compile Include="DomainObject.cs" />
     <Compile Include="IFileTransferReporting.cs" />
-    <Compile Include="ModelCollectionBase.cs" />
+    <Compile Include="PrismCollectionBase.cs" />
+    <Compile Include="PrismModelCollectionBase.cs" />
     <Compile Include="NamedCommand.cs" />
     <Compile Include="INameCommand.cs" />
     <Compile Include="NotificationRequestProvider.cs" />
