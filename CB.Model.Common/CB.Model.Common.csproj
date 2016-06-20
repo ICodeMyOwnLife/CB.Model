@@ -53,6 +53,7 @@
     <Compile Include="ConfiguredViewModelBase.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="ExpressionHelper.cs" />
+    <Compile Include="ExtendedObservableCollection.cs" />
     <Compile Include="FileCapacityHelper.cs" />
     <Compile Include="FileProgressReporter.cs" />
     <Compile Include="IdEntityBase.cs" />
