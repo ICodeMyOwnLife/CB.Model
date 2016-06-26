@@ -53,9 +53,9 @@ namespace CB.Model.Prism
 
 
         #region Override
-        protected override void View_CurrentChanged(object sender, EventArgs e)
+        protected override void OnCurrentChanged(object sender, EventArgs e)
         {
-            base.View_CurrentChanged(sender, e);
+            base.OnCurrentChanged(sender, e);
             NotifyPropertiesChanged(nameof(CanRemoveItem));
         }
         #endregion

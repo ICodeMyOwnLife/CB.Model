@@ -19,7 +19,7 @@ namespace CB.Model.Prism
 
 
         #region  Constructors & Destructor
-        public CollectionBase() { }
+        protected CollectionBase() { }
 
         public CollectionBase(TCollection collection)
         {
@@ -33,25 +33,34 @@ namespace CB.Model.Prism
         public virtual TCollection Collection
         {
             get { return _collection; }
-            set
+            private set
             {
                 if (!SetProperty(ref _collection, value)) return;
 
                 CollectionView = new ListCollectionView(value);
-                CollectionView.CurrentChanged += View_CurrentChanged;
+                CurrentChanged += OnCurrentChanged;
             }
         }
 
         public virtual ListCollectionView CollectionView
         {
             get { return _collectionView; }
-            protected set { SetProperty(ref _collectionView, value); }
+            private set { SetProperty(ref _collectionView, value); }
         }
 
         public virtual TItem SelectedItem
         {
             get { return _selectedItem; }
             protected set { SetProperty(ref _selectedItem, value); }
+        }
+        #endregion
+
+
+        #region Events
+        public event EventHandler CurrentChanged
+        {
+            add { CollectionView.CurrentChanged += value; }
+            remove { CollectionView.CurrentChanged -= value; }
         }
         #endregion
 
@@ -88,7 +97,7 @@ namespace CB.Model.Prism
 
 
         #region Event Handlers
-        protected virtual void View_CurrentChanged(object sender, EventArgs e)
+        protected virtual void OnCurrentChanged(object sender, EventArgs e)
             => SelectedItem = CollectionView.CurrentItem is TItem ? (TItem)CollectionView.CurrentItem : default(TItem);
         #endregion
     }

@@ -25,7 +25,7 @@ namespace CB.Model.Prism
 
         #region  Properties & Indexers
         public ICommand Command { get; }
-        public string Name { get; }
+        public string Name { get; set; }
         #endregion
 
 
