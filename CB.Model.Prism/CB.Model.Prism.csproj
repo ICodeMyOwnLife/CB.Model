@@ -68,10 +68,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActiveStategy.cs" />
     <Compile Include="CollectionBase.cs" />
+    <Compile Include="CollectionCommand.cs" />
     <Compile Include="ConfirmationRequestProvider.cs" />
     <Compile Include="ConfirmationViewModelBase.cs" />
     <Compile Include="Disposer.cs" />
+    <Compile Include="ExtendedCompositeCommand.cs" />
     <Compile Include="IFileTransferReporting.cs" />
     <Compile Include="PrismCollectionBase.cs" />
     <Compile Include="PrismModelCollectionBase.cs" />
