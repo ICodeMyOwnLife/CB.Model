@@ -45,6 +45,7 @@ namespace CB.Model.Prism
         #region Methods
         public bool CanExecute(object parameter)
         {
+            if (!_collection.Any()) return false;
             switch (ActiveStategy)
             {
                 case ActiveStategy.WhenAny:
@@ -56,15 +57,21 @@ namespace CB.Model.Prism
             }
         }
 
-        public void Execute(object parameter) { }
+        public void Execute(object parameter)
+        {
+            foreach (var command in GetCommands())
+            {
+                command.Execute(parameter);
+            }
+        }
         #endregion
 
 
         #region Event Handlers
         private void Collection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            RegisterCommands(GetCommands(e.NewItems.Cast<TViewModel>()));
-            UnregisterCommands(GetCommands(e.OldItems.Cast<TViewModel>()));
+            if (e.NewItems != null) RegisterCommands(GetCommands(e.NewItems.Cast<TViewModel>()));
+            if (e.OldItems != null) UnregisterCommands(GetCommands(e.OldItems.Cast<TViewModel>()));
             OnCanExecuteChanged();
         }
         #endregion
