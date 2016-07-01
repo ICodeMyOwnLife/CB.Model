@@ -11,6 +11,3 @@ namespace CB.Model.Prism
         #endregion
     }
 }
-
-
-// TODO: Implement NameCommand classes
