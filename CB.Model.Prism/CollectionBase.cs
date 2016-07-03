@@ -19,7 +19,6 @@ namespace CB.Model.Prism
 
 
         #region  Constructors & Destructor
-        protected CollectionBase() { }
 
         public CollectionBase(TCollection collection)
         {

@@ -69,6 +69,8 @@
     <Compile Include="IIdEntity.cs" />
     <Compile Include="IIdModel.cs" />
     <Compile Include="IIdNameEntity.cs" />
+    <Compile Include="ITerminate.cs" />
+    <Compile Include="IInitialize.cs" />
     <Compile Include="ILog.cs" />
     <Compile Include="IReportFileProgress.cs" />
     <Compile Include="IReportProgress.cs" />

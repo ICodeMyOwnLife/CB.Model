@@ -85,11 +85,4 @@ namespace CB.Model.Serialization
         }
         #endregion
     }
-
-    public enum SerializationType
-    {
-        Json,
-        Xml,
-        Xaml
-    }
 }
