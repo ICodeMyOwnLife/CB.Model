@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Web.Script.Serialization;
+using System.Xml.Serialization;
 using CB.Model.Common;
 using Prism.Mvvm;
 
@@ -14,14 +16,17 @@ namespace CB.Model.Prism
     public abstract class PrismModelBase: BindableObject, INotifyDataErrorInfo
     {
         #region Fields
+        [NonSerialized]
         private ErrorsContainer<ValidationResult> _errorsContainer;
         #endregion
 
 
         #region  Properties & Indexers
+        [XmlIgnore, SoapIgnore, ScriptIgnore]
         protected ErrorsContainer<ValidationResult> ErrorsContainer
             => _errorsContainer ?? (_errorsContainer = new ErrorsContainer<ValidationResult>(OnErrorsChanged));
 
+        [XmlIgnore, SoapIgnore, ScriptIgnore]
         public virtual bool HasErrors => ErrorsContainer.HasErrors;
         #endregion
 

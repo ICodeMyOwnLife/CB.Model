@@ -1,6 +1,5 @@
 using System;
 using System.Configuration;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
@@ -12,9 +11,9 @@ namespace CB.Model.Serialization
         #region Fields
         private readonly string _defaultFilePath;
         private readonly string _defaultSerializerType;
-        private ModelSerializerBase _serializer;
         private readonly string _fileKey;
         private string _fileValue;
+        private ModelSerializerBase _serializer;
         private readonly string _serializerKey;
         #endregion
 
@@ -48,8 +47,7 @@ namespace CB.Model.Serialization
             var file = GetFile() ?? SetDefaultFile();
 
             var directory = Path.GetDirectoryName(file);
-            Debug.Assert(directory != null, "directory != null");
-            if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+            if (directory != null && !Directory.Exists(directory)) Directory.CreateDirectory(directory);
 
             var serializer = GetSerializer() ?? SetDefaultSerializer();
 
