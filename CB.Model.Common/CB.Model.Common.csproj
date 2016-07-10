@@ -51,6 +51,7 @@
     <Compile Include="BindableObject.cs" />
     <Compile Include="BindMode.cs" />
     <Compile Include="ConfiguredViewModelBase.cs" />
+    <Compile Include="ConvertHelper.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="ExpressionHelper.cs" />
     <Compile Include="ExtendedObservableCollection.cs" />
