@@ -67,6 +67,7 @@
     <Compile Include="IdNameModelBase.cs" />
     <Compile Include="IdNameModelViewModel.cs" />
     <Compile Include="IdNameModelViewModelBase.cs" />
+    <Compile Include="IHandleProgress.cs" />
     <Compile Include="IIdEntity.cs" />
     <Compile Include="IIdModel.cs" />
     <Compile Include="IIdNameEntity.cs" />

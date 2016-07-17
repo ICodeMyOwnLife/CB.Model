@@ -7,7 +7,7 @@ using Microsoft.Practices.Prism.Commands;
 
 namespace CB.Model.Prism
 {
-    public class ProgressTaskViewModelBase: PrismViewModelBase
+    public class ProgressTaskViewModelBase: PrismViewModelBase, IHandleProgress
     {
         #region Fields
         private readonly Action _cancelAction;
