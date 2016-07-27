@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using static CB.IO.Common.IO;
 
 
 namespace CB.Model.Serialization
@@ -13,10 +14,10 @@ namespace CB.Model.Serialization
 
         #region Methods
         public virtual T ReadFromFile<T>(string path)
-            => Deserialize<T>(File.ReadAllText(path));
+            => Deserialize<T>(File.ReadAllText(GetAbsolutePath(path)));
 
         public virtual void WriteToFile<T>(string path, T obj)
-            => File.WriteAllText(path, Serialize(obj));
+            => File.WriteAllText(GetAbsolutePath(path), Serialize(obj));
         #endregion
     }
 }

@@ -54,6 +54,12 @@
     <Compile Include="XamlModelSerializer.cs" />
     <Compile Include="XmlModelSerializer.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CB.IO\CB.IO.Common\CB.IO.Common.csproj">
+      <Project>{65789d31-922e-4801-a486-99c06827448c}</Project>
+      <Name>CB.IO.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

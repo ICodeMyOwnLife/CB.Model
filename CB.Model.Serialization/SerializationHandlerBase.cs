@@ -66,7 +66,8 @@ namespace CB.Model.Serialization
             return asm.CreateInstance(typeName) as ModelSerializerBase;
         }
 
-        private string GetFile() => _fileValue ?? (_fileValue = GetFileSetting());
+        private string GetFile()
+            => _fileValue ?? (_fileValue = GetFileSetting());
 
         private string GetFileSetting()
             => ConfigurationManager.AppSettings[_fileKey];
