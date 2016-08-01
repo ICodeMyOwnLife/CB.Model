@@ -70,7 +70,10 @@ namespace CB.Model.Serialization
             => _fileValue ?? (_fileValue = GetFileSetting());
 
         private string GetFileSetting()
-            => ConfigurationManager.AppSettings[_fileKey];
+        {
+            var path = ConfigurationManager.AppSettings[_fileKey];
+            return IO.Common.IO.GetAbsolutePath(path);
+        }
 
         private ModelSerializerBase GetSerializer()
             => _serializer ?? (_serializer = GetSerializerSetting());
