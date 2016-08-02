@@ -76,6 +76,7 @@
     <Compile Include="ConfirmationViewModelBase.cs" />
     <Compile Include="Disposer.cs" />
     <Compile Include="ExtendedCompositeCommand.cs" />
+    <Compile Include="IdPrismViewModelBase.cs" />
     <Compile Include="IFileTransferReporting.cs" />
     <Compile Include="PrismCollectionBase.cs" />
     <Compile Include="PrismModelCollectionBase.cs" />
