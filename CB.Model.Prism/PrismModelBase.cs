@@ -23,10 +23,12 @@ namespace CB.Model.Prism
 
         #region  Properties & Indexers
         [XmlIgnore, SoapIgnore, ScriptIgnore]
+        [Display(AutoGenerateField = false)]
         protected ErrorsContainer<ValidationResult> ErrorsContainer
             => _errorsContainer ?? (_errorsContainer = new ErrorsContainer<ValidationResult>(OnErrorsChanged));
 
         [XmlIgnore, SoapIgnore, ScriptIgnore]
+        [Display(AutoGenerateField = false)]
         public virtual bool HasErrors => ErrorsContainer.HasErrors;
         #endregion
 
