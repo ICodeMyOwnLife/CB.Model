@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.CB.Model.Serialization
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CB.Model.Annotations", "CB.Model.Annotations\CB.Model.Annotations.csproj", "{5B623305-8769-49D8-A530-7834AD463FFA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CB.Model.Localization", "CB.Model.Localization\CB.Model.Localization.csproj", "{08CAEAF8-2B9F-4042-9034-81F13778FB03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{5B623305-8769-49D8-A530-7834AD463FFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B623305-8769-49D8-A530-7834AD463FFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B623305-8769-49D8-A530-7834AD463FFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08CAEAF8-2B9F-4042-9034-81F13778FB03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08CAEAF8-2B9F-4042-9034-81F13778FB03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08CAEAF8-2B9F-4042-9034-81F13778FB03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08CAEAF8-2B9F-4042-9034-81F13778FB03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
