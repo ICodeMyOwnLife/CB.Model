@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Web.Script.Serialization;
 using System.Xml.Serialization;
@@ -47,12 +49,11 @@ namespace CB.Model.Prism
         #region Override
         protected override bool SetField<T>(ref T field, T value, string propertyName, Func<T, T> transformField = null)
         {
-            var result = base.SetField(ref field, value, propertyName, transformField);
-            if (result)
-            {
-                ValidateProperty(value, propertyName);
-            }
-            return result;
+            if (!base.SetField(ref field, value, propertyName, transformField)) return false;
+
+            ValidateProperty(value, propertyName);
+            NotifyPropertyChanged(nameof(HasErrors));
+            return true;
         }
         #endregion
 
@@ -80,6 +81,26 @@ namespace CB.Model.Prism
 
         protected virtual void SetPropertyErrors(string propertyName, params string[] errors)
             => SetPropertyErrors(propertyName, errors?.Any() == true ? (IEnumerable<string>)errors : null);
+
+        protected virtual void ValidateProperties(params string[] propertyNames)
+        {
+            var type = GetType();
+            ValidateProperties(propertyNames.Select(propertyName => type.GetProperty(propertyName)));
+        }
+
+        protected virtual void ValidateProperties(IEnumerable<LambdaExpression> propertyExpressions)
+            => ValidateProperties(propertyExpressions.Select(expression => expression.GetPropertyInfo()));
+
+        protected virtual void ValidateProperties(params Expression<Func<object>>[] propertyExpressions)
+            => ValidateProperties(propertyExpressions.Cast<LambdaExpression>());
+
+        private void ValidateProperties(IEnumerable<PropertyInfo> propertyInfos)
+        {
+            foreach (var propertyInfo in propertyInfos)
+            {
+                ValidateProperty(propertyInfo.GetValue(this), propertyInfo.Name);
+            }
+        }
 
         protected virtual void ValidateProperty(object value, string propertyName)
         {
